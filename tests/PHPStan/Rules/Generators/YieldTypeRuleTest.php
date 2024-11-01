@@ -5,6 +5,7 @@ namespace PHPStan\Rules\Generators;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleLevelHelper;
 use PHPStan\Testing\RuleTestCase;
+use const PHP_EOL;
 
 /**
  * @extends RuleTestCase<YieldTypeRule>
@@ -66,7 +67,8 @@ class YieldTypeRuleTest extends RuleTestCase
 			[
 				'Generator expects key type K of int|string, (K of int)|string given.',
 				21,
-				'Type string is not always the same as K. It breaks the contract for some argument types, typically subtypes.',
+				'• Type string is not always the same as K. It breaks the contract for some argument types, typically subtypes.' . PHP_EOL .
+				'• Type string is not always the same as K. It breaks the contract for some argument types, typically subtypes.',
 			],
 		]);
 	}

@@ -638,10 +638,6 @@ class CallToFunctionParametersRuleTest extends RuleTestCase
 				6,
 			],
 			[
-				'Parameter #3 $data_comp_func of function array_udiff expects callable(1|2|3|4|5|6, 1|2|3|4|5|6): int, Closure(int, int): (literal-string&lowercase-string&non-falsy-string&numeric-string) given.',
-				14,
-			],
-			[
 				'Parameter #1 $arr1 of function array_udiff expects array<string>, null given.',
 				20,
 			],

@@ -309,6 +309,11 @@ class AccessoryLowercaseStringType implements CompoundType, AccessoryType
 		return TrinaryLogic::createYes();
 	}
 
+	public function isUppercaseString(): TrinaryLogic
+	{
+		return TrinaryLogic::createNo();
+	}
+
 	public function isClassStringType(): TrinaryLogic
 	{
 		return TrinaryLogic::createMaybe();

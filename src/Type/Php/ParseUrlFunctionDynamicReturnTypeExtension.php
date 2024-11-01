@@ -7,6 +7,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\FunctionReflection;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Accessory\AccessoryLowercaseStringType;
+use PHPStan\Type\Accessory\AccessoryUppercaseStringType;
 use PHPStan\Type\Constant\ConstantArrayTypeBuilder;
 use PHPStan\Type\Constant\ConstantBooleanType;
 use PHPStan\Type\Constant\ConstantIntegerType;
@@ -39,15 +40,23 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 	/** @var array<string,Type>|null */
 	private ?array $componentTypesPairedStrings = null;
 
+	private ?Type $allComponentsTogetherType = null;
+
 	/** @var array<int,Type>|null */
 	private ?array $componentTypesPairedConstantsForLowercaseString = null;
 
 	/** @var array<string,Type>|null */
 	private ?array $componentTypesPairedStringsForLowercaseString = null;
 
-	private ?Type $allComponentsTogetherType = null;
-
 	private ?Type $allComponentsTogetherTypeForLowercaseString = null;
+
+	/** @var array<int,Type>|null */
+	private ?array $componentTypesPairedConstantsForUppercaseString = null;
+
+	/** @var array<string,Type>|null */
+	private ?array $componentTypesPairedStringsForUppercaseString = null;
+
+	private ?Type $allComponentsTogetherTypeForUppercaseString = null;
 
 	public function isFunctionSupported(FunctionReflection $functionReflection): bool
 	{
@@ -67,12 +76,18 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			$componentType = $scope->getType($functionCall->getArgs()[1]->value);
 
 			if (!$componentType->isConstantValue()->yes()) {
-				return $this->createAllComponentsReturnType($urlType->isLowercaseString()->yes());
+				return $this->createAllComponentsReturnType(
+					$urlType->isLowercaseString()->yes(),
+					$urlType->isUppercaseString()->yes(),
+				);
 			}
 
 			$componentType = $componentType->toInteger();
 			if (!$componentType instanceof ConstantIntegerType) {
-				return $this->createAllComponentsReturnType($urlType->isLowercaseString()->yes());
+				return $this->createAllComponentsReturnType(
+					$urlType->isLowercaseString()->yes(),
+					$urlType->isLowercaseString()->yes(),
+				);
 			}
 		} else {
 			$componentType = new ConstantIntegerType(-1);
@@ -96,7 +111,10 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 
 		if ($componentType->getValue() === -1) {
 			return TypeCombinator::union(
-				$this->createComponentsArray($urlType->isLowercaseString()->yes()),
+				$this->createComponentsArray(
+					$urlType->isLowercaseString()->yes(),
+					$urlType->isUppercaseString()->yes(),
+				),
 				new ConstantBooleanType(false),
 			);
 		}
@@ -105,10 +123,14 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			return $this->componentTypesPairedConstantsForLowercaseString[$componentType->getValue()] ?? new ConstantBooleanType(false);
 		}
 
+		if ($urlType->isUppercaseString()->yes()) {
+			return $this->componentTypesPairedConstantsForUppercaseString[$componentType->getValue()] ?? new ConstantBooleanType(false);
+		}
+
 		return $this->componentTypesPairedConstants[$componentType->getValue()] ?? new ConstantBooleanType(false);
 	}
 
-	private function createAllComponentsReturnType(bool $urlIsLowercase): Type
+	private function createAllComponentsReturnType(bool $urlIsLowercase, bool $urlIsUppercase): Type
 	{
 		if ($urlIsLowercase) {
 			if ($this->allComponentsTogetherTypeForLowercaseString === null) {
@@ -117,7 +139,7 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 					new NullType(),
 					IntegerRangeType::fromInterval(0, 65535),
 					new IntersectionType([new StringType(), new AccessoryLowercaseStringType()]),
-					$this->createComponentsArray(true),
+					$this->createComponentsArray(true, false),
 				];
 
 				$this->allComponentsTogetherTypeForLowercaseString = TypeCombinator::union(...$returnTypes);
@@ -126,13 +148,29 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			return $this->allComponentsTogetherTypeForLowercaseString;
 		}
 
+		if ($urlIsUppercase) {
+			if ($this->allComponentsTogetherTypeForUppercaseString === null) {
+				$returnTypes = [
+					new ConstantBooleanType(false),
+					new NullType(),
+					IntegerRangeType::fromInterval(0, 65535),
+					new IntersectionType([new StringType(), new AccessoryUppercaseStringType()]),
+					$this->createComponentsArray(false, true),
+				];
+
+				$this->allComponentsTogetherTypeForUppercaseString = TypeCombinator::union(...$returnTypes);
+			}
+
+			return $this->allComponentsTogetherTypeForUppercaseString;
+		}
+
 		if ($this->allComponentsTogetherType === null) {
 			$returnTypes = [
 				new ConstantBooleanType(false),
 				new NullType(),
 				IntegerRangeType::fromInterval(0, 65535),
 				new StringType(),
-				$this->createComponentsArray(false),
+				$this->createComponentsArray(false, false),
 			];
 
 			$this->allComponentsTogetherType = TypeCombinator::union(...$returnTypes);
@@ -141,7 +179,7 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 		return $this->allComponentsTogetherType;
 	}
 
-	private function createComponentsArray(bool $urlIsLowercase): Type
+	private function createComponentsArray(bool $urlIsLowercase, bool $urlIsUppercase): Type
 	{
 		$builder = ConstantArrayTypeBuilder::createEmpty();
 
@@ -151,6 +189,14 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			}
 
 			foreach ($this->componentTypesPairedStringsForLowercaseString as $componentName => $componentValueType) {
+				$builder->setOffsetValueType(new ConstantStringType($componentName), $componentValueType, true);
+			}
+		} elseif ($urlIsUppercase) {
+			if ($this->componentTypesPairedStringsForUppercaseString === null) {
+				throw new ShouldNotHappenException();
+			}
+
+			foreach ($this->componentTypesPairedStringsForUppercaseString as $componentName => $componentValueType) {
 				$builder->setOffsetValueType(new ConstantStringType($componentName), $componentValueType, true);
 			}
 		} else {
@@ -173,13 +219,10 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 		}
 
 		$string = new StringType();
-		$lowercaseString = new IntersectionType([new StringType(), new AccessoryLowercaseStringType()]);
 		$port = IntegerRangeType::fromInterval(0, 65535);
 		$false = new ConstantBooleanType(false);
 		$null = new NullType();
-
 		$stringOrFalseOrNull = TypeCombinator::union($string, $false, $null);
-		$lowercaseStringOrFalseOrNull = TypeCombinator::union($lowercaseString, $false, $null);
 		$portOrFalseOrNull = TypeCombinator::union($port, $false, $null);
 
 		$this->componentTypesPairedConstants = [
@@ -192,16 +235,6 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			PHP_URL_QUERY => $stringOrFalseOrNull,
 			PHP_URL_FRAGMENT => $stringOrFalseOrNull,
 		];
-		$this->componentTypesPairedConstantsForLowercaseString = [
-			PHP_URL_SCHEME => $lowercaseStringOrFalseOrNull,
-			PHP_URL_HOST => $lowercaseStringOrFalseOrNull,
-			PHP_URL_PORT => $portOrFalseOrNull,
-			PHP_URL_USER => $lowercaseStringOrFalseOrNull,
-			PHP_URL_PASS => $lowercaseStringOrFalseOrNull,
-			PHP_URL_PATH => $lowercaseStringOrFalseOrNull,
-			PHP_URL_QUERY => $lowercaseStringOrFalseOrNull,
-			PHP_URL_FRAGMENT => $lowercaseStringOrFalseOrNull,
-		];
 
 		$this->componentTypesPairedStrings = [
 			'scheme' => $string,
@@ -213,6 +246,20 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			'query' => $string,
 			'fragment' => $string,
 		];
+
+		$lowercaseString = new IntersectionType([new StringType(), new AccessoryLowercaseStringType()]);
+		$lowercaseStringOrFalseOrNull = TypeCombinator::union($lowercaseString, $false, $null);
+
+		$this->componentTypesPairedConstantsForLowercaseString = [
+			PHP_URL_SCHEME => $lowercaseStringOrFalseOrNull,
+			PHP_URL_HOST => $lowercaseStringOrFalseOrNull,
+			PHP_URL_PORT => $portOrFalseOrNull,
+			PHP_URL_USER => $lowercaseStringOrFalseOrNull,
+			PHP_URL_PASS => $lowercaseStringOrFalseOrNull,
+			PHP_URL_PATH => $lowercaseStringOrFalseOrNull,
+			PHP_URL_QUERY => $lowercaseStringOrFalseOrNull,
+			PHP_URL_FRAGMENT => $lowercaseStringOrFalseOrNull,
+		];
 		$this->componentTypesPairedStringsForLowercaseString = [
 			'scheme' => $lowercaseString,
 			'host' => $lowercaseString,
@@ -222,6 +269,30 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			'path' => $lowercaseString,
 			'query' => $lowercaseString,
 			'fragment' => $lowercaseString,
+		];
+
+		$uppercaseString = new IntersectionType([new StringType(), new AccessoryUppercaseStringType()]);
+		$uppercaseStringOrFalseOrNull = TypeCombinator::union($uppercaseString, $false, $null);
+
+		$this->componentTypesPairedConstantsForUppercaseString = [
+			PHP_URL_SCHEME => $uppercaseStringOrFalseOrNull,
+			PHP_URL_HOST => $uppercaseStringOrFalseOrNull,
+			PHP_URL_PORT => $portOrFalseOrNull,
+			PHP_URL_USER => $uppercaseStringOrFalseOrNull,
+			PHP_URL_PASS => $uppercaseStringOrFalseOrNull,
+			PHP_URL_PATH => $uppercaseStringOrFalseOrNull,
+			PHP_URL_QUERY => $uppercaseStringOrFalseOrNull,
+			PHP_URL_FRAGMENT => $uppercaseStringOrFalseOrNull,
+		];
+		$this->componentTypesPairedStringsForUppercaseString = [
+			'scheme' => $uppercaseString,
+			'host' => $uppercaseString,
+			'port' => $port,
+			'user' => $uppercaseString,
+			'pass' => $uppercaseString,
+			'path' => $uppercaseString,
+			'query' => $uppercaseString,
+			'fragment' => $uppercaseString,
 		];
 	}
 
