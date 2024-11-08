@@ -86,7 +86,7 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			if (!$componentType instanceof ConstantIntegerType) {
 				return $this->createAllComponentsReturnType(
 					$urlType->isLowercaseString()->yes(),
-					$urlType->isLowercaseString()->yes(),
+					$urlType->isUppercaseString()->yes(),
 				);
 			}
 		} else {
