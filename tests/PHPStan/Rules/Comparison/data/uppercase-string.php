@@ -1,6 +1,6 @@
 <?php
 
-namespace LowercaseString;
+namespace UppercaseString;
 
 class Foo
 {
