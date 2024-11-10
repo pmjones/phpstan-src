@@ -5,7 +5,6 @@ namespace PHPStan\Rules\Generators;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleLevelHelper;
 use PHPStan\Testing\RuleTestCase;
-use const PHP_EOL;
 
 /**
  * @extends RuleTestCase<YieldTypeRule>
