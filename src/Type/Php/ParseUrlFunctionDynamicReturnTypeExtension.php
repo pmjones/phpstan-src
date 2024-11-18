@@ -132,6 +132,26 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 
 	private function createAllComponentsReturnType(bool $urlIsLowercase, bool $urlIsUppercase): Type
 	{
+		if ($urlIsLowercase && $urlIsUppercase) {
+			if (
+				$this->allComponentsTogetherTypeForLowercaseString === null
+				&& $this->allComponentsTogetherTypeForLowercaseString === null
+			) {
+				$returnTypes = [
+					new ConstantBooleanType(false),
+					new NullType(),
+					IntegerRangeType::fromInterval(0, 65535),
+					new IntersectionType([new StringType(), new AccessoryLowercaseStringType(), new AccessoryUppercaseStringType()]),
+					$this->createComponentsArray(true, true),
+				];
+
+				$union = TypeCombinator::union(...$returnTypes);
+				$this->allComponentsTogetherTypeForLowercaseString = $union;
+				$this->allComponentsTogetherTypeForUppercaseString = $union;
+				return $union;
+			}
+		}
+
 		if ($urlIsLowercase) {
 			if ($this->allComponentsTogetherTypeForLowercaseString === null) {
 				$returnTypes = [
