@@ -482,7 +482,13 @@ final class InitializerExprTypeResolver
 			$accessoryTypes[] = new AccessoryLiteralStringType();
 		}
 
-		$this->appendAccessoryCasedStringTypes($leftStringType, $rightStringType, $accessoryTypes);
+		if ($leftStringType->isLowercaseString()->and($rightStringType->isLowercaseString())->yes()) {
+			$accessoryTypes[] = new AccessoryLowercaseStringType();
+		}
+
+		if ($leftStringType->isUppercaseString()->and($rightStringType->isUppercaseString())->yes()) {
+			$accessoryTypes[] = new AccessoryUppercaseStringType();
+		}
 
 		$leftNumericStringNonEmpty = TypeCombinator::remove($leftStringType, new ConstantStringType(''));
 		if ($leftNumericStringNonEmpty->isNumericString()->yes()) {
@@ -516,26 +522,6 @@ final class InitializerExprTypeResolver
 		}
 
 		return new StringType();
-	}
-
-	protected function appendAccessoryCasedStringTypes($leftStringType, $rightStringType, array &$accessoryTypes): void
-	{
-		$lower = $leftStringType->isLowercaseString()->and($rightStringType->isLowercaseString())->yes();
-		$upper = $leftStringType->isUppercaseString()->and($rightStringType->isUppercaseString())->yes();
-
-		if ($lower && $upper) {
-			return;
-		}
-
-		if ($lower) {
-			$accessoryTypes[] = new AccessoryLowercaseStringType();
-			return;
-		}
-
-		if ($upper) {
-			$accessoryTypes[] = new AccessoryUppercaseStringType();
-			return;
-		}
 	}
 
 	/**
