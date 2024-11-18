@@ -18,7 +18,7 @@ class Foo
 		if (array_key_exists('foo', $a)) {
 			$value = $a['foo'];
 			if (\is_string($value)) {
-				assertType('lowercase-string|uppercase-string', $value);
+				assertType('uppercase-string', $value);
 			}
 		}
 
