@@ -12,12 +12,12 @@ class Foo
 	 */
 	public function doTrim(string $uppercase, string $string): void
 	{
-		assertType('uppercase-string', trim($uppercase));
-		assertType('uppercase-string', ltrim($uppercase));
-		assertType('uppercase-string', rtrim($uppercase));
-		assertType('uppercase-string', trim($uppercase, $string));
-		assertType('uppercase-string', ltrim($uppercase, $string));
-		assertType('uppercase-string', rtrim($uppercase, $string));
+		assertType('lowercase-string|uppercase-string', trim($uppercase));
+		assertType('lowercase-string|uppercase-string', ltrim($uppercase));
+		assertType('lowercase-string|uppercase-string', rtrim($uppercase));
+		assertType('lowercase-string|uppercase-string', trim($uppercase, $string));
+		assertType('lowercase-string|uppercase-string', ltrim($uppercase, $string));
+		assertType('lowercase-string|uppercase-string', rtrim($uppercase, $string));
 		assertType('string', trim($string));
 		assertType('string', ltrim($string));
 		assertType('string', rtrim($string));
