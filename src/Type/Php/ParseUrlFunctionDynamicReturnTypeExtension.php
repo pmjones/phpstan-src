@@ -211,7 +211,9 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			foreach ($this->componentTypesPairedStringsForLowercaseString as $componentName => $componentValueType) {
 				$builder->setOffsetValueType(new ConstantStringType($componentName), $componentValueType, true);
 			}
-		} elseif ($urlIsUppercase) {
+		}
+
+		if ($urlIsUppercase) {
 			if ($this->componentTypesPairedStringsForUppercaseString === null) {
 				throw new ShouldNotHappenException();
 			}
@@ -219,7 +221,9 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 			foreach ($this->componentTypesPairedStringsForUppercaseString as $componentName => $componentValueType) {
 				$builder->setOffsetValueType(new ConstantStringType($componentName), $componentValueType, true);
 			}
-		} else {
+		}
+
+		if (! $urlIsLowercase && ! $urlIsUppercase) {
 			if ($this->componentTypesPairedStrings === null) {
 				throw new ShouldNotHappenException();
 			}
