@@ -344,13 +344,12 @@ class IntersectionType implements CompoundType
 				|| $type instanceof AccessoryLowercaseStringType
 				|| $type instanceof AccessoryUppercaseStringType
 			) {
-				if ($type instanceof AccessoryLowercaseStringType && !$level->isPrecise()) {
+				if (
+					($type instanceof AccessoryLowercaseStringType || $type instanceof AccessoryUppercaseStringType)
+					&& !$level->isPrecise()
+				) {
 					continue;
 				}
-				if ($type instanceof AccessoryUppercaseStringType && !$level->isPrecise()) {
-					continue;
-				}
-
 				if ($type instanceof AccessoryNonFalsyStringType) {
 					$nonFalsyStr = true;
 				}
