@@ -321,17 +321,17 @@ function is_callable(mixed $value, bool $syntax_only = false, ?string &$callable
 function abs($num) {}
 
 /**
- * @return ($string is lowercase-string ? lowercase-string : ($string is uppercase-string ? uppercase-string : string))
+ * @return ($string is lowercase-string&uppercase-string ? lowercase-string&uppercase-string : ($string is lowercase-string ? lowercase-string : ($string is uppercase-string ? uppercase-string : string)))
  */
 function trim(string $string, string $characters = " \n\r\t\v\x00"): string {}
 
 /**
- * @return ($string is lowercase-string ? lowercase-string : ($string is uppercase-string ? uppercase-string : string))
+ * @return ($string is lowercase-string&uppercase-string ? lowercase-string&uppercase-string : ($string is lowercase-string ? lowercase-string : ($string is uppercase-string ? uppercase-string : string)))
  */
 function ltrim(string $string, string $characters = " \n\r\t\v\x00"): string {}
 
 /**
- * @return ($string is lowercase-string ? lowercase-string : ($string is uppercase-string ? uppercase-string : string))
+ * @return ($string is lowercase-string&uppercase-string ? lowercase-string&uppercase-string : ($string is lowercase-string ? lowercase-string : ($string is uppercase-string ? uppercase-string : string)))
  */
 function rtrim(string $string, string $characters = " \n\r\t\v\x00"): string {}
 
