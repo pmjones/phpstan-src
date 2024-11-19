@@ -42,7 +42,8 @@ final class TrimFunctionDynamicReturnTypeExtension implements DynamicFunctionRet
 			$accessory[] = new AccessoryUppercaseStringType();
 		}
 		if (count($accessory) > 0) {
-			return new IntersectionType([new StringType(), ...$accessory]);
+			$accessory[] = new StringType();
+			return new IntersectionType($accessory);
 		}
 
 		return new StringType();
