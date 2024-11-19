@@ -135,7 +135,7 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements DynamicFunctio
 		if ($urlIsLowercase && $urlIsUppercase) {
 			if (
 				$this->allComponentsTogetherTypeForLowercaseString === null
-				&& $this->allComponentsTogetherTypeForLowercaseString === null
+				&& $this->allComponentsTogetherTypeForUppercaseString === null
 			) {
 				$returnTypes = [
 					new ConstantBooleanType(false),
