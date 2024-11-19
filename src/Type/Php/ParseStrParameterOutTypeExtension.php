@@ -45,7 +45,8 @@ final class ParseStrParameterOutTypeExtension implements FunctionParameterOutTyp
 			$accessory[] = new AccessoryUppercaseStringType();
 		}
 		if (count($accessory) > 0) {
-			$valueType = new IntersectionType([new StringType(), ...$accessory]);
+			$accessory[] = new StringType();
+			$valueType = new IntersectionType($accessory);
 		} else {
 			$valueType = new StringType();
 		}

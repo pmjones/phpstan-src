@@ -66,7 +66,8 @@ final class ExplodeFunctionDynamicReturnTypeExtension implements DynamicFunction
 			$accessory[] = new AccessoryUppercaseStringType();
 		}
 		if (count($accessory) > 0) {
-			$returnValueType = new IntersectionType([new StringType(), ...$accessory]);
+			$accessory[] = new StringType();
+			$returnValueType = new IntersectionType($accessory);
 		} else {
 			$returnValueType = new StringType();
 		}
