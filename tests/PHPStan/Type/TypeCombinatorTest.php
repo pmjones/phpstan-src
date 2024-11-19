@@ -2052,6 +2052,14 @@ class TypeCombinatorTest extends PHPStanTestCase
 			],
 			[
 				[
+					new IntersectionType([new StringType(), new AccessoryLowercaseStringType()]),
+					new IntersectionType([new StringType(), new AccessoryUppercaseStringType()]),
+				],
+				UnionType::class,
+				'lowercase-string|uppercase-string',
+			],
+			[
+				[
 					TemplateTypeFactory::create(
 						TemplateTypeScope::createWithFunction('doFoo'),
 						'T',
@@ -4014,6 +4022,14 @@ class TypeCombinatorTest extends PHPStanTestCase
 				],
 				IntersectionType::class,
 				'literal-string&uppercase-string',
+			],
+			[
+				[
+					new IntersectionType([new StringType(), new AccessoryLowercaseStringType()]),
+					new IntersectionType([new StringType(), new AccessoryUppercaseStringType()]),
+				],
+				IntersectionType::class,
+				'lowercase-string&uppercase-string',
 			],
 		];
 
