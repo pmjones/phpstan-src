@@ -12,13 +12,14 @@ use PHPStan\Type\IntersectionType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
 use function count;
+use function in_array;
 
 final class TrimFunctionDynamicReturnTypeExtension implements DynamicFunctionReturnTypeExtension
 {
 
 	public function isFunctionSupported(FunctionReflection $functionReflection): bool
 	{
-		return \in_array($functionReflection->getName(), ['trim', 'rtrim', 'ltrim'], true);
+		return in_array($functionReflection->getName(), ['trim', 'rtrim', 'ltrim'], true);
 	}
 
 	public function getTypeFromFunctionCall(
@@ -35,13 +36,13 @@ final class TrimFunctionDynamicReturnTypeExtension implements DynamicFunctionRet
 		$stringType = $scope->getType($args[0]->value);
 		$accessory = [];
 		if ($stringType->isLowercaseString()->yes()) {
-		    $accessory[] = new AccessoryLowercaseStringType();
+			$accessory[] = new AccessoryLowercaseStringType();
 		}
 		if ($stringType->isUppercaseString()->yes()) {
-		    $accessory[] = new AccessoryUppercaseStringType();
+			$accessory[] = new AccessoryUppercaseStringType();
 		}
 		if (count($accessory) > 0) {
-		    return new IntersectionType([new StringType(), ...$accessory]);
+			return new IntersectionType([new StringType(), ...$accessory]);
 		}
 
 		return new StringType();

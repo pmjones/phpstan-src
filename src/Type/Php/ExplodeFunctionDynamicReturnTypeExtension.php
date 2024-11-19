@@ -60,15 +60,15 @@ final class ExplodeFunctionDynamicReturnTypeExtension implements DynamicFunction
 		$stringType = $scope->getType($args[1]->value);
 		$accessory = [];
 		if ($stringType->isLowercaseString()->yes()) {
-		    $accessory[] = new AccessoryLowercaseStringType();
+			$accessory[] = new AccessoryLowercaseStringType();
 		}
 		if ($stringType->isUppercaseString()->yes()) {
-		    $accessory[] = new AccessoryUppercaseStringType();
+			$accessory[] = new AccessoryUppercaseStringType();
 		}
 		if (count($accessory) > 0) {
-		    $returnValueType = new IntersectionType([new StringType(), ...$accessory]);
+			$returnValueType = new IntersectionType([new StringType(), ...$accessory]);
 		} else {
-		    $returnValueType = new StringType();
+			$returnValueType = new StringType();
 		}
 
 		$returnType = AccessoryArrayListType::intersectWith(new ArrayType(new IntegerType(), $returnValueType));

@@ -16,7 +16,7 @@ use PHPStan\Type\MixedType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
 use PHPStan\Type\UnionType;
-
+use function count;
 use function in_array;
 use function strtolower;
 
